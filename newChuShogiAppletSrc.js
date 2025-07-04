@@ -78,6 +78,7 @@ class ChuShogiApplet {
     #showInfluenceHighlights = false;
     #showHighlightButtons = true;
     #showSetupBoxAfterLoading = true;
+    #showDashboardOption = true;
 
     // Board Highlights
     #selectionHighlightColor = '#8080ff';
@@ -171,6 +172,7 @@ class ChuShogiApplet {
             else if (key === 'showInfluenceHighlights') this.#showInfluenceHighlights = (value === 'true');
             else if (key === 'showHighlightButtons') this.#showHighlightButtons = (value === 'true');
             else if (key === 'showSetupBoxAfterLoading') this.#showSetupBoxAfterLoading = (value === 'true');
+            else if (key === 'showDashboardOption') this.#showDashboardOption = (value === 'true');
             // Board Highlights
             else if (key === 'selectionHighlightColor') this.#selectionHighlightColor = value;
             else if (key === 'midpointHighlightColor') this.#midpointHighlightColor = value;
@@ -377,7 +379,11 @@ class ChuShogiApplet {
     }
 
     #newGameButton() {
-        return ((!this.#viewOnly) ? '&nbsp;<input type="button" class="disabledDuringRecap' + this.#id + '" value="New Game" onclick="chuApplets[' + this.#id + '].newGame();">' : '');
+        return (((this.#showDashboardOption || this.#startGameHasMoves()) && !this.#viewOnly) ? '&nbsp;<input type="button" class="disabledDuringRecap' + this.#id + '" value="New Game" onclick="chuApplets[' + this.#id + '].newGame();">' : '');
+    }
+
+    #startGameHasMoves() {
+        return Board.getAllowedMoveFormats().test(this.#startGame.split(' ')[0]);
     }
 
     #resetButton() {
@@ -405,7 +411,7 @@ class ChuShogiApplet {
     #dropDownMenu() {
         let dropDownTab = '<div id="chuGameLogDropDown' + this.#id + '"><div id="chuGameLogDropButton' + this.#id + '">Game Log &#9660;</div><div id="chuGameLogDropContent' + this.#id + '">';
         dropDownTab += '<p onclick="chuApplets[' + this.#id + '].openGameLogWindow(0);document.getElementById(\'chuGameLogDropButton' + this.#id + '\').innerHTML = \'Game Log &#9660;\'">Game Log</p>';
-        if (!this.#viewOnly) {
+        if ((this.#showDashboardOption || this.#allowPositionSetup) && !this.#viewOnly) {
             dropDownTab += '<p onclick="chuApplets[' + this.#id + '].openGameLogWindow(1);document.getElementById(\'chuGameLogDropButton' + this.#id + '\').innerHTML = \'Dashboard &#9660;\'">Dashboard</p>';
         }
         dropDownTab += '<p onclick="chuApplets[' + this.#id + '].openGameLogWindow(2);document.getElementById(\'chuGameLogDropButton' + this.#id + '\').innerHTML = \'Rules &#9660;\'">Rules</p>';
@@ -432,13 +438,58 @@ class ChuShogiApplet {
         return '<div id="displayedPosition' + this.#id + '"></div><hr><div id="fenCode' + this.#id + '"></div><hr><div id="gameRecord' + this.#id + '"></div>';
     }
 
+    #dashboardWindow() {
+        if ((!this.#showDashboardOption && !this.#allowPositionSetup) || this.#viewOnly) return '<p>Dashboard is not available.</p>';
+
+        let dbTab = '';
+        if ((this.#allowPositionSetup) && !this.#viewOnly) {
+            dbTab += '<p>';
+            dbTab += '<input type="button" class="disabledDuringRecap" value="Input SFEN" onclick="chuApplets[' + this.#id + '].inputSFEN();" />&nbsp;';
+            dbTab += '<textarea style="resize:none;" id="newSFEN' + this.#id + '" rows="7" cols="49" class="boardControlWithPlaceholder" placeholder="Paste SFEN here\n' + this.#board.getSFEN() + '"></textarea>';
+            dbTab += '</p>';
+        }
+
+        dbTab += '<p>';
+        dbTab += '<input type="button" class="disabledDuringRecap" value="Input Game" onclick="chuApplets[' + this.#id + '].inputGame();" />&nbsp;';
+        dbTab += '<input type="button" class="disabledDuringRecap" value="Append to Game" onclick="chuApplets[' + this.#id + '].appendGame();" />&nbsp;';
+        dbTab += '<input type="button" value="Append to Current Position" class="disabledDuringRecap" onclick="chuApplets[' + this.#id + '].trimGame();chuApplets[' + this.#id + '].appendGame();" /><br>';
+        dbTab += '<textarea style="resize:none;" id="newGame' + this.#id + '" rows="7" cols="49" class="boardControlWithPlaceholder" placeholder="Paste Game here\n' + this.#board.getGame() + '"></textarea>';
+        dbTab += '</p>';
+        return dbTab;
+    }
+
+    inputSFEN() {
+        let sfenInput = document.getElementById('newSFEN' + this.#id).value;
+        if (sfenInput.trim() === '') return;
+        this.#board.setSFEN(sfenInput);
+        this.#updateDashoardDisplays();
+        this.updateDisplays();
+    }
+
+    inputGame() {
+        let gameInput = document.getElementById('newGame' + this.#id).value;
+        if (gameInput.trim() === '') return;
+        this.#board.setGame(gameInput);
+        this.#updateDashoardDisplays();
+        this.updateDisplays();
+    }
+
+    appendGame() {
+        let gameInput = document.getElementById('newGame' + this.#id).value;
+        if (gameInput.trim() === '') return;
+        this.#board.setGame(this.#board.getGame() + ' ' + gameInput);
+        document.getElementById('newGame' + this.#id).value = '';
+        document.getElementById('newGame' + this.#id).placeholder = 'Paste Game here\n' + this.#board.getGame();
+        this.updateDisplays();
+    }
+
     #createGameLog() {
         let gameLogTab = '<div class="gameLogTopButtons' + this.#id + '">' + this.#topButtons() + '</div>';
         gameLogTab += '<div class="recapPanel' + this.#id + '">' + this.#recapPanel() + '</div>';
         gameLogTab += '<div class="recapPanel' + this.#id + '">' + this.#dropDownMenu() + this.#moveField() + '</div>';
         gameLogTab += '<div class="chuGameLog wordWrapBreakWord">';
         gameLogTab += '<div id="gameInfo' + this.#id + '" class="chuGameLogDisplayOption' + this.#id + '" style="display:block">' + this.#gameLogWindow() + '</div>';
-        gameLogTab += '<div id="dashboard' + this.#id + '" class="chuGameLogDisplayOption' + this.#id + '" style="display:none"><p>INSERT DASHBOARD HERE</p></div>';
+        gameLogTab += '<div id="dashboard' + this.#id + '" class="chuGameLogDisplayOption' + this.#id + '" style="display:none">' + this.#dashboardWindow() + '</div>';
         gameLogTab += '<div id="rules' + this.#id + '" class="chuGameLogDisplayOption' + this.#id + '" style="display:none"><p>INSERT RULES HERE</p></div>';
         gameLogTab += '<div id="rules' + this.#id + '" class="chuGameLogDisplayOption' + this.#id + '" style="display:none"><p>INSERT HELP HERE</p></div>';
         gameLogTab += '<div id="rules' + this.#id + '" class="chuGameLogDisplayOption' + this.#id + '" style="display:none"><p>INSERT ADVANCED HELP HERE</p></div>';
@@ -576,6 +627,7 @@ class ChuShogiApplet {
         // Shadow the last move
         this.#displayLastMove();
         this.#updateGameLog();
+        this.#updateDashoardDisplays();
 
         if (this.#board.hasMidpoint()) {
             let mx = (this.#flip ? (11 - this.#board.getMidpointX()) : this.#board.getMidpointX());
@@ -721,6 +773,17 @@ class ChuShogiApplet {
             let move = this.#board.getGameMove(this.#board.getDisplayedPosition() - 1);
             if (!move) return '';
             return ' (Last Move: ' + move.toString() + ')';
+        }
+    }
+
+    #updateDashoardDisplays() {
+        if (document.getElementById('newSFEN' + this.#id) != null) {
+            document.getElementById('newSFEN' + this.#id).value = '';
+            document.getElementById('newSFEN' + this.#id).placeholder = 'Paste SFEN here\n' + this.#board.getSFEN();
+        }
+        if (document.getElementById('newGame' + this.#id) != null) {
+            document.getElementById('newGame' + this.#id).value = '';
+            document.getElementById('newGame' + this.#id).placeholder = 'Paste Game here\n' + this.#board.getGame();
         }
     }
 
@@ -1094,7 +1157,11 @@ class ChuShogiApplet {
             } else if (x2 == x1 && y2 == (y1 + deferralOffset) && this.#board.hasPrompt()) {
                 this.#board.clearSelection();
             } else {
-                this.#inputMoveFromClicks(x1, y1, ex, ey, x2, y2, false);
+                if (this.#board.isPromotionEligible(x1, y1, ex, ey, x2, y2) && this.#board.vetMove(x1, y1, ex, ey, x2, y2, true)) {
+                    this.#board.setPrompt(x2, y2);
+                } else {
+                    this.#inputMoveFromClicks(x1, y1, ex, ey, x2, y2, false);
+                }
             }
         } else if (!this.#board.hasPrompt() && this.#board.isPromotionEligible(x1, y1, ex, ey, x2, y2) && this.#board.vetMove(x1, y1, ex, ey, x2, y2, true)) {
             this.#board.setPrompt(x2, y2);
@@ -1385,6 +1452,10 @@ class Board {
     static getLegalMoves(pieceType) {
         if (pieceType < 0 && pieceType > Board.legal.length) return Board.legal[0];
         return Board.legal[pieceType];
+    }
+
+    static getAllowedMoveFormats() {
+        return Board.#allowedMoveFormats;
     }
 
     binarySearch(array, target) {
@@ -1997,7 +2068,13 @@ class Board {
         }
     }
 
-    isPromotionEligible(x1, y1, ex, ey, x2, y2) {
+    isPromotionEligible(x1, y1, epx, epy, x2, y2) {
+        let ex = epx;
+        let ey = epy;
+        if ((epx == x2 && epy == y2) || (epx == x1 && epy == y1)) {
+            ex = -1;
+            ey = -1;
+        }
         let pieceType = this.getPieceTypeAt(x1, y1);
         let pieceColor = this.getPieceColorAt(x1, y1);
         let evicType = ((this.isInBoardRange(ex) && this.isInBoardRange(ey)) ? this.getPieceTypeAt(ex, ey) : 0);
@@ -2017,7 +2094,7 @@ class Board {
     }
 
     #promotionZoneTest(y, pieceColor) {
-        return (y >= (pieceColor ? 0 : 8) && y <= (pieceColor ? 3 : 11))
+        return (y >= (pieceColor ? 0 : 8) && y <= (pieceColor ? 3 : 11));
     }
 
     // CLICK SELECTION METHODS
@@ -2567,6 +2644,10 @@ class Board {
     }
 
     vetMove(x1, y1, ex, ey, x2, y2, promotion) {
+        if ((ex == x2 && ey == y2) || (ex == x1 && ey == y1)) {
+            ex = -1;
+            ey = -1;
+        }
         if (!this.#enforceRules) return true;
         for (let i = 0; i < this.#legalMoveList.length; ++i) {
             if (this.#legalMoveList[i].equals(x1, y1, ex, ey, x2, y2, promotion)) return true;
