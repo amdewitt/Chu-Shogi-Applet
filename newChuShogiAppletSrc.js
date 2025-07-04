@@ -2540,10 +2540,6 @@ class Board {
         }
     }
 
-    // Check Test (Used to enforce repetition rules)
-    isInCheck(color) { return this.#isInCheck(color); }
-    countKings(color) { return this.#countRoyals(color)}
-
     #isInCheck(color) {
         if (this.#forbidAllRepeats) return false; // No need to est for check if all repeats are forbidden
         let playerToMove = color ? 1 : 0;
