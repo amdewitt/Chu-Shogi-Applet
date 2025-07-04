@@ -80,7 +80,7 @@ class ChuShogiApplet {
     #showSetupBoxAfterLoading = true;
     #showDashboardOption = true;
 
-    // Board Highlights
+    // Highlights
     #selectionHighlightColor = '#8080ff';
     #midpointHighlightColor = '#ff8080';
     #lastMoveHighlightColor = '#80ff80';
@@ -91,6 +91,10 @@ class ChuShogiApplet {
     #blackInfluenceHighlightColor = '#606070';
     #whiteInfluenceHighlightColor = '#efefff';
     #conflictingInfluenceHighlightColor = '#bfbfcf';
+    #arrowColor0 = '#00b700';
+    #arrowColor1 = '#c60000';
+    #arrowColor2 = '#0000ff';
+    #arrowColor3 = '#ffa500';
 
     // Styling Variables
     #buttonColor = 'whitesmoke';
@@ -173,7 +177,7 @@ class ChuShogiApplet {
             else if (key === 'showHighlightButtons') this.#showHighlightButtons = (value === 'true');
             else if (key === 'showSetupBoxAfterLoading') this.#showSetupBoxAfterLoading = (value === 'true');
             else if (key === 'showDashboardOption') this.#showDashboardOption = (value === 'true');
-            // Board Highlights
+            // Highlights
             else if (key === 'selectionHighlightColor') this.#selectionHighlightColor = value;
             else if (key === 'midpointHighlightColor') this.#midpointHighlightColor = value;
             else if (key === 'lastMoveHighlightColor') this.#lastMoveHighlightColor = value;
@@ -445,7 +449,7 @@ class ChuShogiApplet {
         if ((this.#allowPositionSetup) && !this.#viewOnly) {
             dbTab += '<p>';
             dbTab += '<input type="button" class="disabledDuringRecap" value="Input SFEN" onclick="chuApplets[' + this.#id + '].inputSFEN();" />&nbsp;';
-            dbTab += '<textarea style="resize:none;" id="newSFEN' + this.#id + '" rows="7" cols="49" class="boardControlWithPlaceholder" placeholder="Paste SFEN here\n' + this.#board.getSFEN() + '"></textarea>';
+            dbTab += '<textarea style="resize:none;" id="newSFEN' + this.#id + '" rows="4" cols="49" class="boardControlWithPlaceholder" placeholder="Paste SFEN here\n' + this.#board.getSFEN() + '"></textarea>';
             dbTab += '</p>';
         }
 
@@ -2052,7 +2056,7 @@ class Board {
 
         ++this.#displayed;
         if (addToMoveList) {
-            this.#moveList.push(new GameMove(x1, y1, ex, ey, x2, y2, promotion, cStrikeX, cStrikeY, '', this.getSFEN().split(' ')[0], (this.#board[y2][x2] & 1024)));
+            this.#moveList.push(new GameMove(x1, y1, ex, ey, x2, y2, promotion, cStrikeX, cStrikeY, this.getSFEN().split(' ')[0], (this.#board[y2][x2] & 1024)));
         }
         return true;
     }
@@ -2791,10 +2795,9 @@ class GameMove {
     #promotion;
     #counterStrikeX;
     #counterStrikeY;
-    #comment;
     #positionData;
     #playerWhoMoved;
-    constructor(x1, y1, ex, ey, x2, y2, promotion, counterStrikeX, counterStrikeY, comment, positionData, playerWhoMoved) {
+    constructor(x1, y1, ex, ey, x2, y2, promotion, counterStrikeX, counterStrikeY, positionData, playerWhoMoved) {
         this.#x1 = Math.max(0, Math.min(11, Math.floor(x1)));
         this.#y1 = Math.max(0, Math.min(11, Math.floor(y1)));
         this.#ex = Math.max(-1, Math.min(11, Math.floor(ex)));
@@ -2804,7 +2807,6 @@ class GameMove {
         this.#promotion = (promotion === true);
         this.#counterStrikeX = Math.max(-1, Math.min(11, Math.floor(counterStrikeX)));
         this.#counterStrikeY = Math.max(-1, Math.min(11, Math.floor(counterStrikeY)));
-        this.#comment = comment;
         this.#positionData = positionData;
         this.#playerWhoMoved = playerWhoMoved;
     }
@@ -2835,9 +2837,6 @@ class GameMove {
     }
     getCounterStrikeY() {
         return this.#counterStrikeY;
-    }
-    getComment() {
-        return this.#comment;
     }
     getSFEN() {
         let csTab = ' -';
