@@ -97,6 +97,13 @@ class ChuShogiApplet {
     #buttonActiveColor = 'silver';
     #buttonTextColor = 'black';
     #buttonBorder = 'thin solid black';
+    #dropDownMenuColor = 'whitesmoke';
+    #dropDownMenuTextColor = 'black';
+    #dropDownMenuBorder = 'thin solid black';
+    #textFieldColor = 'none';
+    #textFieldTextColor = 'none';
+    #textFieldPlaceholderColor = 'none';
+    #textFieldBorder = 'thin solid';
     #gameLogColor = 'white';
     #gameLogTextColor = 'black';
     #gameLogBorder = 'thin solid black';
@@ -181,6 +188,13 @@ class ChuShogiApplet {
             else if (key === 'buttonActiveColor') this.#buttonActiveColor = value;
             else if (key === 'buttonTextColor') this.#buttonTextColor = value;
             else if (key === 'buttonBorder') this.#buttonBorder = value;
+            else if (key === 'dropDownMenuColor') this.#dropDownMenuColor = value;
+            else if (key === 'dropDownMenuTextColor') this.#dropDownMenuTextColor = value;
+            else if (key === 'dropDownMenuBorder') this.#dropDownMenuBorder = value;
+            else if (key === 'textFieldColor') this.#textFieldColor = value;
+            else if (key === 'textFieldTextColor') this.#textFieldTextColor = value;
+            else if (key === 'textFieldPlaceholderColor') this.#textFieldPlaceholderColor = value;
+            else if (key === 'textFieldBorder') this.#textFieldBorder = value;
             else if (key === 'gameLogColor') this.#gameLogColor = value;
             else if (key === 'gameLogTextColor') this.#gameLogTextColor = value;
             else if (key === 'gameLogBorder') this.#gameLogBorder = value;
@@ -217,13 +231,13 @@ class ChuShogiApplet {
         if (this.#playbackSpeed > ChuShogiApplet.#playbackSpeedMax) this.#playbackSpeed = ChuShogiApplet.#playbackSpeedMax;
     }
 
-    #createBoardCSS() {
+    #getCSS() {
         let cssTab = '<style>';
         // Board Container
-        cssTab += '#chuShogiApplet' + this.#id + ' { float:none;clear:both; }';
-        cssTab += '#chuShogiApplet' + this.#id + ' .chuShogiBoard { float:left;margin:0 10px 10px 0; }';
-        cssTab += '#chuShogiApplet' + this.#id + ' #chuShogiHand' + this.#id + ' { text-align:center;height:' + (4 * this.#cellSize) + 'px;overflow-y:scroll; }';
-        cssTab += '#chuShogiApplet' + this.#id + ' .chuShogiGameLog { float:left;clear:right;margin:0 0 10px 0; }';
+        cssTab += '#chuShogiApplet' + this.#id + ' { float:none;clear:both; }\n';
+        cssTab += '#chuShogiApplet' + this.#id + ' .chuShogiBoard { float:left;margin:0 10px 10px 0; }\n';
+        cssTab += '#chuShogiApplet' + this.#id + ' #chuShogiHand' + this.#id + ' { text-align:center;height:' + (4 * this.#cellSize) + 'px;overflow-y:scroll; }\n';
+        cssTab += '#chuShogiApplet' + this.#id + ' .chuShogiGameLog { float:left;clear:right;margin:0 0 10px 0; }\n';
         // Board and Hand
         cssTab += '#chuShogiApplet' + this.#id + ' .chuBoard,.chuHand { border-collapse: collapse;user-select: none;table-layout: fixed; }\n';
         cssTab += '#chuShogiApplet' + this.#id + ' .rowSpanningRimCell { text-align:center;vertical-align:middle;background-color:' + this.#rimColor + '; }\n';
@@ -245,12 +259,21 @@ class ChuShogiApplet {
         cssTab += '#chuShogiApplet' + this.#id + ' input[type="button"]:hover { background-color:' + this.#buttonHoverColor + '; }\n';
         cssTab += '#chuShogiApplet' + this.#id + ' input[type="button"]:active { background-color:' + this.#buttonActiveColor + '; }\n';
         cssTab += '#chuShogiApplet' + this.#id + ' input[type="button"]:disabled { background-color:' + this.#buttonActiveColor + ';border-color:' + this.#buttonActiveColor + '; }\n';
+        cssTab += '#chuShogiApplet' + this.#id + ' #chuGameLogDropButton' + this.#id + ' { user-select:none;width:150px;text-align:center;background-color:' + this.#dropDownMenuColor + '; color:' + this.#dropDownMenuTextColor + ';border:' + this.#dropDownMenuBorder + '; }\n';
+        cssTab += '#chuShogiApplet' + this.#id + ' #chuGameLogDropDown' + this.#id + ' { display:inline-block; }\n';
+        cssTab += '#chuShogiApplet' + this.#id + ' #chuGameLogDropContent' + this.#id + ' { display:none;position:absolute;background-color:' + this.#dropDownMenuColor + ';border:' + this.#dropDownMenuBorder + ';box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);z-index: 1;width:150px;text-align:center }\n';
+        cssTab += '#chuShogiApplet' + this.#id + ' #chuGameLogDropContent' + this.#id + ' p { user-select:none;display:block;padding: 0px 10px;text-decoration: none;color:' + this.#dropDownMenuTextColor + ' !important; }\n';
+        cssTab += '#chuShogiApplet' + this.#id + ' #chuGameLogDropContent' + this.#id + ' p:hover { text-decoration:underline !important; }\n';
+        cssTab += '#chuShogiApplet' + this.#id + ' #chuGameLogDropDown' + this.#id + ':hover #chuGameLogDropContent' + this.#id + ' { display:block; }\n';
+        cssTab += '#chuShogiApplet' + this.#id + ' input[type="text"],textarea { background-color:' + this.#textFieldColor + ' !important; color:' + this.#textFieldTextColor + ' !important; border:' + this.#textFieldBorder + ' !important; }\n';
+        cssTab += '#chuShogiApplet' + this.#id + ' input[type="number"] { background-color:' + this.#textFieldColor + ' !important; color:' + this.#textFieldTextColor + ' !important; border:' + this.#textFieldBorder + ' !important; }\n';
+        cssTab += '#chuShogiApplet' + this.#id + ' .boardControlWithPlaceholder::placeholder { color:' + this.#textFieldPlaceholderColor + ' !important; }\n';
         cssTab += '</style>';
         return cssTab;
     }
 
     #createBoardDisplay() {
-        let boardTab = this.#createBoardCSS();
+        let boardTab = this.#getCSS();
         boardTab += '<table class="chuBoard">';
 
         // Graphics Options
@@ -366,44 +389,59 @@ class ChuShogiApplet {
         if (this.#showHighlightButtons) {
             tab += '<input type="button" style="min-width:115px;" value="' + (this.#showInfluenceHighlights ? ' Hide Influence ' : 'Show Influence') + '" onclick="chuApplets[' + this.#id + '].toggleInfluenceHighlights(); this.value = (chuApplets[' + this.#id + '].isShowingInfluenceHighlights() ? \' Hide Influence \' : \'Show Influence\')" />';
             tab += '<input type="button" style="min-width:115px;" value="' + (this.#showLastMove ? ' Hide Last Move ' : 'Show Last Move') + '" onclick="chuApplets[' + this.#id + '].toggleLastMove(); this.value = (chuApplets[' + this.#id + '].isShowingLastMove() ? \' Hide Last Move \' : \'Show Last Move\')" />';
-            tab += (!this.#viewOnly ?'<hr><input type="text" id="textMoveInput' + this.#id + '" placeholder="Type in move here"><input type="button" id="textMoveInputButton' + this.#id + '" class="disabledDuringRecap' + this.#id + '" value="Input Move" onclick="chuApplets[' + this.#id + '].inputMoveFromText();">' : '');
         }
 
         return tab;
     }
 
     #recapPanel() {
-        return '<input type="button" id="recapBackward' + this.#id + '" class="disabledDuringRecap' + this.#id + '" value="<|<|" onclick="chuApplets[' + this.#id + '].recapGame(true);">&nbsp;<input type="button" id="recapStop' + this.#id + '" value="[O]" onclick="chuApplets[' + this.#id + '].stopPlayback();" disabled>&nbsp;<input type="button" id="recapForward' + this.#id + '" class="disabledDuringRecap' + this.#id + '" value="|>|>" onclick="chuApplets[' + this.#id + '].recapGame(false);">&nbsp;&nbsp;<input type="button" value="Set Recap Speed (Hz)" onclick="chuApplets[' + this.#id + '].setRecapSpeed();" /><input id="playbackSpeedSetter' + this.#id + '" type="number" style="width:60px;" value = "' + this.#playbackSpeed + '" />';
+        return '<input type="button" id="recapBackward' + this.#id + '" class="disabledDuringRecap' + this.#id + '" value="<|<|" onclick="chuApplets[' + this.#id + '].recapGame(true);">&nbsp;<input type="button" id="recapStop' + this.#id + '" value="[O]" onclick="chuApplets[' + this.#id + '].stopPlayback();" disabled>&nbsp;<input type="button" id="recapForward' + this.#id + '" class="disabledDuringRecap' + this.#id + '" value="|>|>" onclick="chuApplets[' + this.#id + '].recapGame(false);">&nbsp;&nbsp;<input type="button" value="Set Recap Speed (Hz)" onclick="chuApplets[' + this.#id + '].setRecapSpeed();" /><input id="playbackSpeedSetter' + this.#id + '" class="boardControlWithPlaceholder" type="number" style="width:60px;" placeholder="' + this.#playbackSpeed + '" />';
     }
 
     #setupBoxButton() {
         return '<input type="button" style="min-width:115px;" value="' + (this.isShowingSetupBox() ? ' Hide Setup Box ' : 'Show Setup Box') + '" onclick="chuApplets[' + this.#id + '].toggleSetupBpx(); this.value = (chuApplets[' + this.#id + '].isShowingSetupBox() ? \' Hide Setup Box \' : \'Show Setup Box\')" />';
     }
 
-    toggleSetupBpx() {
-        let setupBox = document.getElementById('chuShogiHand' + this.#id);
-        if (setupBox.style.display === 'none' || setupBox.style.display === '') {
-            setupBox.style.display = 'block';
-        } else {
-            setupBox.style.display = 'none';
+    #dropDownMenu() {
+        let dropDownTab = '<div id="chuGameLogDropDown' + this.#id + '"><div id="chuGameLogDropButton' + this.#id + '">Game Log &#9660;</div><div id="chuGameLogDropContent' + this.#id + '">';
+        dropDownTab += '<p onclick="chuApplets[' + this.#id + '].openGameLogWindow(0);document.getElementById(\'chuGameLogDropButton' + this.#id + '\').innerHTML = \'Game Log &#9660;\'">Game Log</p>';
+        dropDownTab += '<p onclick="chuApplets[' + this.#id + '].openGameLogWindow(1);document.getElementById(\'chuGameLogDropButton' + this.#id + '\').innerHTML = \'Dashboard &#9660;\'">Dashboard</p>';
+        dropDownTab += '<p onclick="chuApplets[' + this.#id + '].openGameLogWindow(2);document.getElementById(\'chuGameLogDropButton' + this.#id + '\').innerHTML = \'Rules &#9660;\'">Rules</p>';
+        dropDownTab += '</div></div>';
+        return dropDownTab;
+    }
+
+    #moveField() {
+        return (!this.#viewOnly ? '&nbsp;<input type="text" id="textMoveInput' + this.#id + '" class="boardControlWithPlaceholder" style="width:110px;" placeholder="Type in move here"><input type="button" id="textMoveInputButton' + this.#id + '" class="disabledDuringRecap' + this.#id + '" value="Input Move" onclick="chuApplets[' + this.#id + '].inputMoveFromText();">' : '');
+    }
+
+    openGameLogWindow(n) {
+        let gameLogWindows = document.getElementsByClassName('chuGameLogDisplayOption' + this.#id);
+        if (n < 0 || n >= gameLogWindows.length) return;
+        for (let i = 0; i < gameLogWindows.length; ++i) {
+            gameLogWindows[i].style.display = 'none';
         }
+        gameLogWindows[n].style.display = 'block';
     }
 
-    isShowingSetupBox() {
-        const el = document.getElementById('chuShogiHand' + this.#id);
-        return el ? (el.style.display === 'block') : this.#showSetupBoxAfterLoading;
+    #gameLogWindow() {
+        return '<div id="displayedPosition' + this.#id + '"></div><hr><div id="fenCode' + this.#id + '"></div><hr><div id="gameRecord' + this.#id + '"></div>';
     }
 
-    createGameLog() {
+    #createGameLog() {
         let gameLogTab = '<div class="gameLogTopButtons' + this.#id + '">' + this.#topButtons() + '</div>';
         gameLogTab += '<div class="recapPanel' + this.#id + '">' + this.#recapPanel() + '</div>';
-        gameLogTab += '<div class="chuGameLog wordWrapBreakWord"><div id="gameInfo' + this.#id + '" style="display:block" class="chuGameLogDisplayOption' + this.#id + '"><div id="displayedPosition' + this.#id + '"></div><hr><div id="fenCode' + this.#id + '"></div><hr><div id="gameRecord' + this.#id + '"></div></div>';
+        gameLogTab += '<div class="recapPanel' + this.#id + '">' + this.#dropDownMenu() + this.#moveField() + '</div>';
+        gameLogTab += '<div class="chuGameLog wordWrapBreakWord">';
+        gameLogTab += '<div id="gameInfo' + this.#id + '" class="chuGameLogDisplayOption' + this.#id + '" style="display:block">' + this.#gameLogWindow() + '</div>';
+        gameLogTab += '<div id="dashboard' + this.#id + '" class="chuGameLogDisplayOption' + this.#id + '" style="display:none"><p>INSERT DASHBOARD HERE</p></div>';
+        gameLogTab += '<div id="rules' + this.#id + '" class="chuGameLogDisplayOption' + this.#id + '" style="display:none"><p>INSERT RULES HERE</p></div>';
         gameLogTab += '</div>';
         return gameLogTab;
     }
 
     #getHTML() {
-        return '<div id="chuShogiApplet' + this.#id + '"><div class="chuShogiBoard">' + this.#createBoardDisplay() + '</div><div class="chuShogiGameLog">' + this.createGameLog() + '</div></div>';
+        return '<div id="chuShogiApplet' + this.#id + '"><div class="chuShogiBoard">' + this.#createBoardDisplay() + '</div><div class="chuShogiGameLog">' + this.#createGameLog() + '</div></div>';
     }
 
     #getCellCanvas(x, y) {
@@ -426,6 +464,15 @@ class ChuShogiApplet {
     }
 
     // Display Methods
+    setImageSet(value) {
+        this.#imageSet = value;
+        let graphicsButtons = document.getElementsByClassName('graphicsOption' + this.#id);
+        for (let i = 0; i < graphicsButtons.length; i++) {
+            graphicsButtons[i].disabled = false;
+        }
+        graphicsButtons[value].disabled = true;
+        this.updateDisplays();
+    }
 
     flipView() {
         this.#flip = !this.#flip;
@@ -443,14 +490,13 @@ class ChuShogiApplet {
         this.updateDisplays();
     }
 
-    setImageSet(value) {
-        this.#imageSet = value;
-        let graphicsButtons = document.getElementsByClassName('graphicsOption' + this.#id);
-        for (let i = 0; i < graphicsButtons.length; i++) {
-            graphicsButtons[i].disabled = false;
+    toggleSetupBpx() {
+        let setupBox = document.getElementById('chuShogiHand' + this.#id);
+        if (setupBox.style.display === 'none' || setupBox.style.display === '') {
+            setupBox.style.display = 'block';
+        } else {
+            setupBox.style.display = 'none';
         }
-        graphicsButtons[value].disabled = true;
-        this.updateDisplays();
     }
 
     isShowingInfluenceHighlights() {
@@ -459,6 +505,11 @@ class ChuShogiApplet {
 
     isShowingLastMove() {
         return this.#showLastMove;
+    }
+
+    isShowingSetupBox() {
+        const el = document.getElementById('chuShogiHand' + this.#id);
+        return el ? (el.style.display === 'block') : this.#showSetupBoxAfterLoading;
     }
 
     updateDisplays() {
@@ -606,7 +657,7 @@ class ChuShogiApplet {
 
     // Returns true if the opposite prefix should be used for the given image name.
     #useOppositePrefix() {
-        if (this.#imageSet == 0 || this.#imageSet == 3 || this.#imageSet == 4 || this.#imageSet == 5) {
+        if (this.#imageSet != 1 && this.#imageSet != 2) {
             return false;
         } else {
             return this.#flip;
@@ -803,8 +854,10 @@ class ChuShogiApplet {
 
     setRecapSpeed(n) {
         this.#playbackSpeed = parseFloat(document.getElementById('playbackSpeedSetter' + this.#id).value);
+        if (isNaN(this.#playbackSpeed)) return;
         this.#setPlaybackSpeedBoundaries();
-        document.getElementById('playbackSpeedSetter' + this.#id).value = this.#playbackSpeed;
+        document.getElementById('playbackSpeedSetter' + this.#id).value = '';
+        document.getElementById('playbackSpeedSetter' + this.#id).placeholder = this.#playbackSpeed;
     }
 
     recapGame(reversePlayback) {
@@ -945,9 +998,6 @@ class ChuShogiApplet {
                 return;
             } else if (this.#board.getSelectedX() >= 100 && (this.#board.isInBoardRange(x) && this.#board.isInBoardRange(y))) {
                 let newPiece = (this.#board.getSelectedX() - 100);
-                if (this.#board.getSelectedX() != 100 && this.#board.getSelectedY() == 1 && newPiece > 0) {
-                    newPiece += 1024;
-                }
                 if (this.#board.getSelectedX() == 100 && this.#board.getSelectedY() == 1) {
                     if (this.#board.getCellAt(x, y) > 0) {
                         this.#board.setSetupCounterStrike(x, y);
@@ -955,6 +1005,9 @@ class ChuShogiApplet {
                         this.#board.setSetupCounterStrike(-1, -1);
                     }
                 } else {
+                    if (this.#board.getSelectedX() != 100 && this.#board.getSelectedY() == 1 && newPiece > 0) {
+                        newPiece += 1024;
+                    }
                     this.#board.setCell(x, y, newPiece);
                 }
                 this.updateDisplays();
