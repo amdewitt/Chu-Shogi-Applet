@@ -1,0 +1,13 @@
+TODO
+
+FEATURES TO ADD
+Make it so that enforceRules does not interfere with Setup Box
+Dashboard used to set positions with keyboard, can be hidden if position setup isn't allowed
+Dropdown menu for controlling what is shown in the game log's display window
+
+NOT IN NCSA YET
+I. Functionality for in-game comments, and Hide/Show Comments Button in Game Log Top Buttons
+a. works differently than those in OCSA: now are nested inside {} curly braces, and all } in a comment except the one that ends it must be preceded by a / slash.
+II. Drawing Board Highlights
+III. Help and Advanced Help
+IV. Any necessary styling options not already implemented

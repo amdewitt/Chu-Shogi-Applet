@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>JavaScript Math</h1>
+<h2>The Math.floor() Method</h2>
+<p>Math.floor() rounds a number DOWN to the nearest integer:</p>
+
+<p id="demo"></p>
+
+<script>
+allowedMoveFormats = /(^([1-9]|1[012])[a-l]([1-9]|1[012])[a-l]$)|(^([1-9]|1[012])[a-l]([1-9]|1[012])[a-l]\+$)|(^([1-9]|1[012])[a-l]([1-9]|1[012])[a-l]([1-9]|1[012])[a-l]$)|(^([1-9]|1[012])[a-l]([1-9]|1[012])[a-l]([1-9]|1[012])[a-l]\+$)/;
+x = '{1} 12f12e {a a} 1a1b {a /} b}';
+function GetGameInputWithMovesOnly(game) {
+  gameParts = game.split(' ');
+  for (i = 0; i < gameParts.length; ++i) {
+    if (gameParts[i].startsWith('{')) {
+      foundCommentEnd = false;
+      while (i < gameParts.length && !foundCommentEnd) {
+        if ((gameParts[i].endsWith('}') && !gameParts[i].endsWith('/}'))) {
+          if (!((i < gameParts.length - 1) && !allowedMoveFormats.test(gameParts[(i + 1)]))) {
+            foundCommentEnd = true;
+          }
+        }
+        gameParts[i] = '';
+        ++i;
+      }
+    } else if (!(allowedMoveFormats.test(gameParts[i]))) {
+      gameParts[i] = '';
+      for (j = i + 1; j < gameParts.length; ++j) {
+        gameParts[j] = '';
+      }
+      i = gameParts.length;
+    }
+  }
+  return gameParts.join(' ').replaceAll(/\s+/g, ' ').trim();
+}
+
+
+function GetGameInputWithCommentsOnly(game) {
+  gameParts = game.split(' ');
+  for (i = 0; i < gameParts.length; ++i) {
+    if (allowedMoveFormats.test(gameParts[i])) {
+      gameParts[i] = '#';
+    } else if (gameParts[i].startsWith('{')) {
+      while (i < gameParts.length && (!(gameParts[i].endsWith('}')) || (gameParts[i].endsWith('/}'))) ) {
+        ++i;
+      }
+    } else {
+      gameParts[i] = '';
+      for (j = i + 1; j < gameParts.length; ++j) {
+        gameParts[j] = '';
+      }
+      i = gameParts.length;
+    }
+  }
+  return gameParts.join(' ').trim();
+}
+document.getElementById("demo").innerHTML = GetGameInputWithCommentsOnly(x) + '<br></br>' + GetGameInputWithMovesOnly(x);
+</script>
+
+</body>
+</html>
