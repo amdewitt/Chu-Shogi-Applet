@@ -549,11 +549,12 @@ class ChuShogiApplet {
             this.#clearHighlight(sx, sy);
 
             if (this.#board.hasPrompt()) {
+                let scx = (this.#flip ? (11 - this.#board.getSelectedX()) : this.#board.getSelectedX());
+                let scy = (this.#flip ? (11 - this.#board.getSelectedY()) : this.#board.getSelectedY());
                 let pcx = (this.#flip ? (11 - this.#board.getPromptX()) : this.#board.getPromptX());
                 let pcy = (this.#flip ? (11 - this.#board.getPromptY()) : this.#board.getPromptY());
-                let dcy = pcy + (pcy >= 6 ? -1 : 1)
-                let adOffset = (this.#board.getPromptY() + ((this.#board.getPromptY() >= 6) ? -2 : 2));
-                let ady = (this.#flip ? (11 - adOffset) : adOffset);
+                let dcy = pcy + (pcy >= 6 ? -1 : 1);
+                let ady = pcy + (pcy >= 6 ? -2 : 2);
 
                 let promotionClickID = pcx + '|' + pcy + '|' + this.#id;
                 let deferralClickID = pcx + '|' + dcy + '|' + this.#id;
@@ -579,7 +580,7 @@ class ChuShogiApplet {
                     this.#makeImage(pcx, dcy, deferralImageType, promptImageColor);
                     this.#clearHighlight(pcx, dcy);
 
-                    if (pcx == this.#board.getSelectedX() && (pcy == this.#board.getSelectedY() || dcy == this.#board.getSelectedY())) {
+                    if (pcx == scx && (pcy == scy || dcy == scy)) {
                         document.getElementById(altDeselectClickID).style.backgroundColor = this.#selectionHighlightColor;
                         document.getElementById(altDeselectClickID).style.backgroundImage = 'none';
                         this.#clearHighlight(pcx, ady);
@@ -591,7 +592,6 @@ class ChuShogiApplet {
                 }
             }
         }
-        document.getElementById('debug').innerHTML = this.#board.getSetupCounterStrikeX() + ' ' + this.#board.getSetupCounterStrikeY();
     }
 
     // Makes an image on the board at the given coordinates with the given type and color.
@@ -931,7 +931,6 @@ class ChuShogiApplet {
             x = 12 - 1 - x;
             y = 12 - 1 - y;
         }
-        if (this.#enforceRules && !this.#board.hasSelection() && (this.#board.getPlayerToMove() ? !this.#board.getPieceColorAt(x, y) : this.#board.getPieceColorAt(x, y))) return;
 
         // Setting positions with the mouse
         if (this.#allowPositionSetup && !this.#viewOnly) {
@@ -967,6 +966,7 @@ class ChuShogiApplet {
         } else if (x >= 100 && x <= 139) return;
 
         // Normal piece selection and movement
+        if (this.#enforceRules && !this.#board.hasSelection() && (this.#board.getPlayerToMove() ? !this.#board.getPieceColorAt(x, y) : this.#board.getPieceColorAt(x, y))) return;
         let clickedPieceType = this.#board.getPieceTypeAt(x, y);
 
         if (!this.#board.hasSelection() && this.#board.hasMidpoint()) {
