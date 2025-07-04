@@ -405,8 +405,12 @@ class ChuShogiApplet {
     #dropDownMenu() {
         let dropDownTab = '<div id="chuGameLogDropDown' + this.#id + '"><div id="chuGameLogDropButton' + this.#id + '">Game Log &#9660;</div><div id="chuGameLogDropContent' + this.#id + '">';
         dropDownTab += '<p onclick="chuApplets[' + this.#id + '].openGameLogWindow(0);document.getElementById(\'chuGameLogDropButton' + this.#id + '\').innerHTML = \'Game Log &#9660;\'">Game Log</p>';
-        dropDownTab += '<p onclick="chuApplets[' + this.#id + '].openGameLogWindow(1);document.getElementById(\'chuGameLogDropButton' + this.#id + '\').innerHTML = \'Dashboard &#9660;\'">Dashboard</p>';
+        if (!this.#viewOnly) {
+            dropDownTab += '<p onclick="chuApplets[' + this.#id + '].openGameLogWindow(1);document.getElementById(\'chuGameLogDropButton' + this.#id + '\').innerHTML = \'Dashboard &#9660;\'">Dashboard</p>';
+        }
         dropDownTab += '<p onclick="chuApplets[' + this.#id + '].openGameLogWindow(2);document.getElementById(\'chuGameLogDropButton' + this.#id + '\').innerHTML = \'Rules &#9660;\'">Rules</p>';
+        dropDownTab += '<p onclick="chuApplets[' + this.#id + '].openGameLogWindow(3);document.getElementById(\'chuGameLogDropButton' + this.#id + '\').innerHTML = \'Help &#9660;\'">Help</p>';
+        dropDownTab += '<p onclick="chuApplets[' + this.#id + '].openGameLogWindow(4);document.getElementById(\'chuGameLogDropButton' + this.#id + '\').innerHTML = \'Advanced Help &#9660;\'">Advanced Help</p>';
         dropDownTab += '</div></div>';
         return dropDownTab;
     }
@@ -436,6 +440,8 @@ class ChuShogiApplet {
         gameLogTab += '<div id="gameInfo' + this.#id + '" class="chuGameLogDisplayOption' + this.#id + '" style="display:block">' + this.#gameLogWindow() + '</div>';
         gameLogTab += '<div id="dashboard' + this.#id + '" class="chuGameLogDisplayOption' + this.#id + '" style="display:none"><p>INSERT DASHBOARD HERE</p></div>';
         gameLogTab += '<div id="rules' + this.#id + '" class="chuGameLogDisplayOption' + this.#id + '" style="display:none"><p>INSERT RULES HERE</p></div>';
+        gameLogTab += '<div id="rules' + this.#id + '" class="chuGameLogDisplayOption' + this.#id + '" style="display:none"><p>INSERT HELP HERE</p></div>';
+        gameLogTab += '<div id="rules' + this.#id + '" class="chuGameLogDisplayOption' + this.#id + '" style="display:none"><p>INSERT ADVANCED HELP HERE</p></div>';
         gameLogTab += '</div>';
         return gameLogTab;
     }
