@@ -1,5 +1,4 @@
 var timer = setTimeout("Init();", 100);
-var scriptURL = document.currentScript.src;
 
 function Init() {
     clearTimeout(timer);
@@ -13,8 +12,9 @@ function Init() {
 
 class ChuShogiApplet {
     static #localImages = true;
+    static #scriptURL = document.currentScript.src.toString();
     static #images = ['', 'p', 'i', 'c', 's', 'g', 'f', 't', 'e', 'x', 'o', 'l', 'a', 'm', 'v', 'b', 'r', 'h', 'd', 'q', 'n', 'k', 'p2', 'i2', 'c2', 's2', 'g2', 'f2', 't2', 'e2', 'x2', 'o2', 'l2', 'a2', 'm2', 'v2', 'b2', 'r2', 'h2', 'd2'];
-    static #imageDir = (ChuShogiApplet.#localImages ? (scriptURL.substring(0, (scriptURL.lastIndexOf('/'))) + '/images/') : 'https://www.chessvariants.com/graphics.dir/svg/DeWittChuShogi/');
+    static #imageDir = (ChuShogiApplet.#localImages ? (this.#scriptURL.substring(0, (this.#scriptURL.lastIndexOf('/'))) + '/images/') : 'https://www.chessvariants.com/graphics.dir/svg/DeWittChuShogi/');
     static #blackPrefix = 'b';
     static #whitePrefix = 'w';
     static #flipPrefix = '1';
@@ -461,6 +461,7 @@ class ChuShogiApplet {
         dropDownTab += '<p onclick="chuApplets[' + this.#id + '].openGameLogWindow(2);document.getElementById(\'chuGameLogDropButton' + this.#id + '\').innerHTML = \'Rules &#9660;\'">Rules</p>';
         dropDownTab += '<p onclick="chuApplets[' + this.#id + '].openGameLogWindow(3);document.getElementById(\'chuGameLogDropButton' + this.#id + '\').innerHTML = \'Help &#9660;\'">Help</p>';
         dropDownTab += '<p onclick="chuApplets[' + this.#id + '].openGameLogWindow(4);document.getElementById(\'chuGameLogDropButton' + this.#id + '\').innerHTML = \'Advanced Help &#9660;\'">Advanced Help</p>';
+        dropDownTab += '<p onclick="chuApplets[' + this.#id + '].openGameLogWindow(5);document.getElementById(\'chuGameLogDropButton' + this.#id + '\').innerHTML = \'Source Code &#9660;\'">Source Code</p>';
         dropDownTab += '</div></div>';
         return dropDownTab;
     }
@@ -536,7 +537,8 @@ class ChuShogiApplet {
         gameLogTab += '<div id="dashboard' + this.#id + '" class="chuGameLogDisplayOption' + this.#id + '" style="display:none">' + this.#dashboardWindow() + '</div>';
         gameLogTab += '<div id="rules' + this.#id + '" class="chuGameLogDisplayOption' + this.#id + '" style="display:none"><p>INSERT RULES HERE</p></div>';
         gameLogTab += '<div id="help' + this.#id + '" class="chuGameLogDisplayOption' + this.#id + '" style="display:none"><p>INSERT HELP HERE</p></div>';
-        gameLogTab += '<div id="advancedHelp' + this.#id + '" class="chuGameLogDisplayOption' + this.#id + '" style="display:none"><p>INSERT ADVANCED HELP HERE</p></div>';
+        gameLogTab += '<div class="chuGameLogDisplayOption' + this.#id + '" style="display:none"><p>INSERT ADVANCED HELP HERE</p></div>';
+        gameLogTab += '<div class="chuGameLogDisplayOption' + this.#id + '" style="display:none"><p>INSERT SOURCE CODE HERE</p></div>';
         gameLogTab += '</div>';
         return gameLogTab;
     }
