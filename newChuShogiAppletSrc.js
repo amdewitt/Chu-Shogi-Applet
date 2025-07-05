@@ -421,7 +421,7 @@ class ChuShogiApplet {
     }
 
     #newGameButton() {
-        return (((this.#showDashboardOption || this.#startGameHasMoves()) && !this.#viewOnly) ? '&nbsp;<input type="button" class="disabledDuringRecap' + this.#id + '" value="New Game" onclick="chuApplets[' + this.#id + '].newGame();">' : '');
+        return (((this.#allowPositionSetup || this.#startGameHasMoves()) && !this.#viewOnly) ? '&nbsp;<input type="button" class="disabledDuringRecap' + this.#id + '" value="New Game" onclick="chuApplets[' + this.#id + '].newGame();">' : '');
     }
 
     #startGameHasMoves() {
