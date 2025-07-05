@@ -128,14 +128,12 @@ class ChuShogiApplet {
     #boundKeyEventCode = this.keyEventCode.bind(this);
 
     mouseOverCode(event) {
-        document.getElementById('debug').innerHTML = 'Mouse Over';
         document.addEventListener('keydown', this.#boundKeyEventCode);
         document.addEventListener('keyup', this.#boundKeyEventCode);
         this.updateChosenArrowColor(event.shiftKey, event.altKey);
     }
 
     mouseOutCode(event) {
-        document.getElementById('debug').innerHTML = 'Mouse Out';
         document.removeEventListener('keydown', this.#boundKeyEventCode);
         document.removeEventListener('keyup', this.#boundKeyEventCode);
         this.updateChosenArrowColor(event.shiftKey, event.altKey);
