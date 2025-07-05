@@ -1,8 +1,7 @@
 TODO
 
 FEATURES TO ADD
-Functionality for switching to among the four board highlight colors
+Rules, Help, Advanced Help, and Source Code Display
 
 NOT IN NCSA YET
-I. Rules, Help, Advanced Help, and Source Code
 DO LAST: Put in check for duplicates of any IDs used in applet
