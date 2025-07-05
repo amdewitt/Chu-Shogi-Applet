@@ -555,8 +555,16 @@ class ChuShogiApplet {
     }
 
     flipView() {
+        let tempArrows = new Array();
+        for (let i = 0; i < this.#arrows.length; ++i) {
+            tempArrows.push(this.#arrows[i]);
+        }
         this.#flip = !this.#flip;
         this.updateDisplays();
+        for (let i = 0; i < tempArrows.length; ++i) {
+            this.#arrows.push(tempArrows[i]);
+        }
+        this.#arrowDisplay();
     }
 
     toggleInfluenceHighlights() {
@@ -1023,7 +1031,7 @@ class ChuShogiApplet {
 
     // Criteria for overriding the context menu event
     #contextMenuOverride() {
-        return (this.#recapping || this.#board.hasSelection() || this.#board.hasSetupBoxSelection());
+        return (this.#recapping || this.#board.hasSelection() || this.#board.hasSetupBoxSelection() || !this.#board.isInBoardRange(this.#arrowX));
     }
 
     // Mouse Down Event
@@ -1069,7 +1077,7 @@ class ChuShogiApplet {
         this.#arrowY = y;
 
         if (!this.#contextMenuOverride()) {
-            this.#touchTimer = setTimeout(this.#longTouchDown, 500, x, y);
+            this.#touchTimer = setTimeout(() => this.#longTouchDown(x, y), 500);
         } else {
             clearTimeout(this.#touchTimer);
         }
@@ -1078,7 +1086,7 @@ class ChuShogiApplet {
     #longTouchDown(x, y) {
         if (this.#contextMenuOverride()) return;
         this.#contextMenuDown = true;
-        DrawDotCanvasHighlight(this.#arrowX, this.#arrowY, this.#selectionHighlightColor);
+        this.#drawDotCanvasHighlight(this.#arrowX, this.#arrowY, this.#selectionHighlightColor);
     }
 
     touchMove(x, y, event) {
