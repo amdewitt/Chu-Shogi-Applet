@@ -122,12 +122,23 @@ class ChuShogiApplet {
     #arrowTouchEndX = -1;
     #arrowTouchEndY = -1;
     #contextMenuDown = false;
-    #mouseHoveringOver = false;
 
     // Event Handlers
-    mouseEventCode(event) {
-        this.keyEventCode(event);
-        document.getElementById('debug').innerHTML = this.#id;
+
+    #boundKeyEventCode = this.keyEventCode.bind(this);
+
+    mouseOverCode(event) {
+        document.getElementById('debug').innerHTML = 'Mouse Over';
+        document.addEventListener('keydown', this.#boundKeyEventCode);
+        document.addEventListener('keyup', this.#boundKeyEventCode);
+        this.updateChosenArrowColor(event.shiftKey, event.altKey);
+    }
+
+    mouseOutCode(event) {
+        document.getElementById('debug').innerHTML = 'Mouse Out';
+        document.removeEventListener('keydown', this.#boundKeyEventCode);
+        document.removeEventListener('keyup', this.#boundKeyEventCode);
+        this.updateChosenArrowColor(event.shiftKey, event.altKey);
     }
 
     keyEventCode(event) {
@@ -305,7 +316,7 @@ class ChuShogiApplet {
 
     #createBoardDisplay() {
         let boardTab = this.#getCSS();
-        boardTab += '<table class="chuBoard">';
+        boardTab += '<table class="chuBoard" onmouseenter="chuApplets[' + this.#id + '].mouseOverCode(event);" onmouseleave="chuApplets[' + this.#id + '].mouseOutCode(event);">';
 
         // Graphics Options
         if (this.#showGraphicsOptions) {
@@ -531,7 +542,7 @@ class ChuShogiApplet {
     }
 
     #getHTML() {
-        return '<div id="chuShogiApplet' + this.#id + '"><div id="chuShogiBoard' + this.#id + '" onmousemove="chuApplets[' + this.#id + '].mouseEventCode(event);" onkeydown="chuApplets[' + this.#id + '].keyEventCode(event)">' + this.#createBoardDisplay() + '</div><div class="chuShogiGameLog">' + this.#createGameLog() + '</div></div>';
+        return '<div id="chuShogiApplet' + this.#id + '"><div id="chuShogiBoard' + this.#id + '">' + this.#createBoardDisplay() + '</div><div class="chuShogiGameLog">' + this.#createGameLog() + '</div></div>';
     }
 
     #getCellCanvas(x, y) {
