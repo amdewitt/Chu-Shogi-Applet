@@ -42,6 +42,8 @@ class ChuShogiApplet {
     #board;
     #recapping = false;
     #recapTimer;
+    #arrows = [];
+    #touchTimer;
 
     // Settings
     // Board Settings
@@ -116,6 +118,9 @@ class ChuShogiApplet {
     // Interaction variables
     #arrowX = -1;
     #arrowY = -1;
+    #arrowTouchEndX = -1;
+    #arrowTouchEndY = -1;
+    #contextMenuDown = false;
 
     // Constructor
     constructor(id, embedTarget) {
@@ -188,6 +193,10 @@ class ChuShogiApplet {
             else if (key === 'blackInfluenceHighlightColor') this.#blackInfluenceHighlightColor = value;
             else if (key === 'whiteInfluenceHighlightColor') this.#whiteInfluenceHighlightColor = value;
             else if (key === 'conflictingInfluenceHighlightColor') this.#conflictingInfluenceHighlightColor = value;
+            else if (key === 'arrowColor0') this.#arrowColor0 = value;
+            else if (key === 'arrowColor1') this.#arrowColor1 = value;
+            else if (key === 'arrowColor2') this.#arrowColor2 = value;
+            else if (key === 'arrowColor3') this.#arrowColor3 = value;
             // Styling Variables
             else if (key === 'buttonColor') this.#buttonColor = value;
             else if (key === 'buttonHoverColor') this.#buttonHoverColor = value;
@@ -274,6 +283,9 @@ class ChuShogiApplet {
         cssTab += '#chuShogiApplet' + this.#id + ' input[type="text"],textarea { background-color:' + this.#textFieldColor + ' !important; color:' + this.#textFieldTextColor + ' !important; border:' + this.#textFieldBorder + ' !important; }\n';
         cssTab += '#chuShogiApplet' + this.#id + ' input[type="number"] { background-color:' + this.#textFieldColor + ' !important; color:' + this.#textFieldTextColor + ' !important; border:' + this.#textFieldBorder + ' !important; }\n';
         cssTab += '#chuShogiApplet' + this.#id + ' .boardControlWithPlaceholder::placeholder { color:' + this.#textFieldPlaceholderColor + ' !important; }\n';
+        // Arrow Canvas
+        cssTab += '#chuShogiApplet' + this.#id + ' #arrowCanvasHolder' + this.#id + ' { position:relative;top:' + this.#rimSize + 'px;left:' + this.#rimSize + 'px;overflow:visible; }\n';
+        cssTab += '#chuShogiApplet' + this.#id + ' #arrowCanvas' + this.#id + ' { position:absolute;pointer-events:none;border:1px solid lime }\n';
         cssTab += '</style>';
         return cssTab;
     }
@@ -287,7 +299,7 @@ class ChuShogiApplet {
             boardTab += '<tr><td class="rowSpanningRimCell" colspan="14">' + this.#graphicsButtons() + '</td></tr>';
         }
 
-        boardTab += '<tr><td class="rimCorner"></td>';
+        boardTab += '<tr><td class="rimCorner"><span id="arrowCanvasHolder' + this.#id + '"></span></td>';
         for (let i = 0; i <= 11; ++i) {
             boardTab += '<td class="' + i + '|a' + '|' + this.#id + ' rimColCell"><b>' + (this.#flip ? this.#board.fileID(11 - i) : this.#board.fileID(i)) + '</b></td>';
         }
@@ -425,7 +437,7 @@ class ChuShogiApplet {
         return dropDownTab;
     }
 
-    #moveField() {
+    #moveInputField() {
         return (!this.#viewOnly ? '&nbsp;<input type="text" id="textMoveInput' + this.#id + '" class="boardControlWithPlaceholder" style="width:110px;" placeholder="Type in move here"><input type="button" id="textMoveInputButton' + this.#id + '" class="disabledDuringRecap' + this.#id + '" value="Input Move" onclick="chuApplets[' + this.#id + '].inputMoveFromText();">' : '');
     }
 
@@ -490,7 +502,7 @@ class ChuShogiApplet {
     #createGameLog() {
         let gameLogTab = '<div class="gameLogTopButtons' + this.#id + '">' + this.#topButtons() + '</div>';
         gameLogTab += '<div class="recapPanel' + this.#id + '">' + this.#recapPanel() + '</div>';
-        gameLogTab += '<div class="recapPanel' + this.#id + '">' + this.#dropDownMenu() + this.#moveField() + '</div>';
+        gameLogTab += '<div class="recapPanel' + this.#id + '">' + this.#dropDownMenu() + this.#moveInputField() + '</div>';
         gameLogTab += '<div class="chuGameLog wordWrapBreakWord">';
         gameLogTab += '<div id="gameInfo' + this.#id + '" class="chuGameLogDisplayOption' + this.#id + '" style="display:block">' + this.#gameLogWindow() + '</div>';
         gameLogTab += '<div id="dashboard' + this.#id + '" class="chuGameLogDisplayOption' + this.#id + '" style="display:none">' + this.#dashboardWindow() + '</div>';
@@ -509,11 +521,18 @@ class ChuShogiApplet {
         return '<canvas id="' + x + '|' + y + '|' + this.#id + 'c" class="boardCellCanvas" width="' + this.#cellSize + '"  height="' + this.#cellSize + '"></canvas>';
     }
 
+    #getArrowCanvas() {
+    let cellBorderWidth = parseFloat(getComputedStyle((document.getElementById(('0|0|' + this.#id)))).getPropertyValue('border-width'));
+    let arrowCanvasSize = (12 * (this.#cellSize + 2)) + (13 * cellBorderWidth);
+    return '<canvas id="arrowCanvas' + this.#id + '" width="' + arrowCanvasSize + '"  height="' + arrowCanvasSize + '"></canvas>';
+}
+
     #embedHTML() {
         this.#embedTarget.innerHTML = this.#getHTML();
         if (this.#showGraphicsOptions) {
             this.setImageSet(this.#imageSet);
         }
+        document.getElementById(('arrowCanvasHolder' + this.#id)).innerHTML = this.#getArrowCanvas();
     }
 
     #createInternalBoard() {
@@ -577,7 +596,9 @@ class ChuShogiApplet {
         // Ensure that the image set is within the allowed range
         this.#setImageSetBoundaries();
         this.#setPlaybackSpeedBoundaries();
-        // Update legal move list
+
+        this.#clearAllHighlights();
+        this.#clearAllArrows();
 
         // Update the board display
         for (let i = 0; i < 12; ++i) {
@@ -586,7 +607,6 @@ class ChuShogiApplet {
                 let y = (this.#flip ? (11 - i) : i);
                 document.getElementById(x + '|' + y + '|' + this.#id).style.backgroundImage = "none";
                 document.getElementById(x + '|' + y + '|' + this.#id).style.backgroundColor = this.#cellColor;
-                this.#clearHighlight(x, y)
                 if (this.#board.isValidPieceValue(this.#board.getCellAt(j, i))) {
                     let type = this.#board.getPieceTypeAt(j, i);
                     let color = this.#board.getPieceColorAt(j, i);
@@ -1001,6 +1021,11 @@ class ChuShogiApplet {
 
     // INTERACTION METHODS
 
+    // Criteria for overriding the context menu event
+    #contextMenuOverride() {
+        return (this.#recapping || this.#board.hasSelection() || this.#board.hasSetupBoxSelection());
+    }
+
     // Mouse Down Event
     mouseDown(x, y, event) {
         this.#arrowX = x;
@@ -1008,15 +1033,31 @@ class ChuShogiApplet {
 
         if (event.button == 0) {
             this.#click(x, y);
+        } else if (event.button == 2) {
+            this.#contextMenuDown = true;
+            if (this.#contextMenuOverride()) return;
+            this.#drawDotCanvasHighlight(this.#arrowX, this.#arrowY, this.#selectionHighlightColor);
         }
     }
 
     // Mouse Up Event
     mouseUp(x, y, event) {
         if (event.button == 0) {
-            if (x != this.#arrowX || y != this.#arrowY) {
+            if (this.#viewOnly) {
+               this.#clearAllArrows();
+            } else if (x != this.#arrowX || y != this.#arrowY) {
                 this.#click(x, y);
             }
+            if (!this.#contextMenuOverride() && this.#contextMenuDown) {
+                this.#arrowDisplay();
+                this.#drawDotCanvasHighlight(this.#arrowX, this.#arrowY, this.#selectionHighlightColor);
+            }
+        } else if (event.button == 2) {
+            this.#contextMenuDown = false;
+
+            if (!this.#contextMenuOverride()) {
+                this.#rightClick(x, y, event);
+            } else if (this.#recapping) { StopPlayback(); return; }
         }
         this.#arrowX = -1;
         this.#arrowY = -1;
@@ -1205,6 +1246,138 @@ class ChuShogiApplet {
         }
     }
 
+    // Arrow Canvas Methods
+
+    #rightClick(x, y, event) {
+        event.preventDefault();
+        let aox = (this.#flip) ? (12 - 1 - this.#arrowX) : this.#arrowX;
+        let aoy = (this.#flip) ? (12 - 1 - this.#arrowY) : this.#arrowY;
+        let rcx = (this.#flip) ? (12 - 1 - x) : x;
+        let rcy = (this.#flip) ? (12 - 1 - y) : y;
+
+        if (this.#contextMenuOverride()) return;
+        else this.#makeArrow(aox, aoy, rcx, rcy, this.#arrowColor0);
+    }
+
+    #makeArrow(x1, y1, x2, y2, color) {
+    let foundArrow = false;
+        for (let i = 0; i < this.#arrows.length; ++i) {
+            if (this.#arrows[i].equals(x1, y1, x2, y2, color)) {
+                this.#arrows.splice(i, 1);
+                foundArrow = true;
+            } else if (this.#arrows[i].equalsWithDifferentColor(x1, y1, x2, y2, color)) {
+                this.#arrows.splice(i, 1);
+            }
+        }
+
+        if (!foundArrow) this.#arrows.push(new Arrow(x1, y1, x2, y2, color));
+        this.#arrowDisplay();
+    }
+
+    #clearAllArrows() {
+        this.#arrows.splice(0);
+        this.#arrowDisplay();
+    }
+
+    #arrowDisplay() {
+        let canvas = document.getElementById(('arrowCanvas' + this.#id));
+        if (canvas == null) return;
+        let ctx = canvas.getContext('2d');
+        ctx.reset();
+        for (let i = 0; i < this.#arrows.length; ++i) {
+            let currentArrow = this.#arrows[i];
+            if (currentArrow.getFromX() == currentArrow.getToX() && currentArrow.getFromY() == currentArrow.getToY()) {
+                this.#drawCircleCanvasHighlight(currentArrow.getFromX(), currentArrow.getFromY(), currentArrow.getColor());
+            } else {
+                this.#drawArrowCanvasHighlight(currentArrow.getFromX(), currentArrow.getFromY(), currentArrow.getToX(), currentArrow.getToY(), currentArrow.getColor());
+            }
+        }
+    }
+
+    #getCanvasCoord(n) {
+        let cellBorderWidth = parseFloat(getComputedStyle((document.getElementById(('0|0|' + this.#id)))).getPropertyValue('border-width'));
+        return (n * (this.#cellSize + 2)) + ((n + 1) * cellBorderWidth) + (((this.#cellSize + 2) / 2));
+    }
+
+    #drawDotCanvasHighlight(x, y, color) {
+        let canvas = document.getElementById(('arrowCanvas' + this.#id));
+        if (canvas == null) return;
+        let ctx = canvas.getContext('2d');
+
+        let centerX = this.#getCanvasCoord(x);
+        let centerY = this.#getCanvasCoord((11 - y));
+        let radiusRatio = 0.22;
+        let radius = this.#cellSize * radiusRatio;
+
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+
+    #drawCircleCanvasHighlight(x, y, color) {
+        if (this.#flip) {
+            x = 12 - 1 - x;
+            y = 12 - 1 - y;
+        }
+
+        let canvas = document.getElementById(('arrowCanvas' + this.#id));
+        if (canvas == null) return;
+        let ctx = canvas.getContext('2d');
+
+        let centerX = this.#getCanvasCoord(x);
+        let centerY = this.#getCanvasCoord((11 - y));
+        let radiusRatio = 0.42;
+        let radius = this.#cellSize * radiusRatio;
+        let circleThickness = (this.#cellSize / 30) + 3.5;
+
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.lineWidth = circleThickness;
+
+        ctx.strokeStyle = color;
+        ctx.stroke();
+    }
+
+    #drawArrowCanvasHighlight(x1, y1, x2, y2, color) {
+        if (this.#flip) {
+            x1 = 12 - 1 - x1;
+            y1 = 12 - 1 - y1;
+            x2 = 12 - 1 - x2;
+            y2 = 12 - 1 - y2;
+        }
+
+        let canvas = document.getElementById(('arrowCanvas' + this.#id));
+        if (canvas == null) return;
+        let ctx = canvas.getContext('2d');
+
+        let asx = this.#getCanvasCoord(x1);
+        let asy = this.#getCanvasCoord((11 - y1));
+        let aex = this.#getCanvasCoord(x2);
+        let aey = this.#getCanvasCoord((11 - y2));
+
+        let arrowAngle = Math.atan2(aey - asy, aex - asx);
+        let arrowLineWidth = this.#cellSize / 8;
+        let arrowHeadAngle = Math.PI / 7;
+        let arrowHeadLength = this.#cellSize / 1.7;
+
+        ctx.strokeStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(asx, asy);
+        ctx.lineTo((aex - (arrowHeadLength / 2) * Math.cos(arrowAngle)), (aey - (arrowHeadLength / 2) * Math.sin(arrowAngle)));
+        ctx.lineWidth = arrowLineWidth;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.lineTo((aex - (arrowHeadLength / 5) * Math.cos(arrowAngle)), (aey - (arrowHeadLength / 5) * Math.sin(arrowAngle)));
+        ctx.lineTo(aex - arrowHeadLength * Math.cos(arrowAngle - arrowHeadAngle), aey - arrowHeadLength * Math.sin(arrowAngle - arrowHeadAngle));
+        ctx.lineTo(aex - arrowHeadLength * Math.cos(arrowAngle + arrowHeadAngle), aey - arrowHeadLength * Math.sin(arrowAngle + arrowHeadAngle));
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.restore();
+    }
+
     // HIGHLIGHT METHODS
 
     #highlightLegalMoves() {
@@ -1334,6 +1507,14 @@ class ChuShogiApplet {
     }
 
     // CELL CANVAS HIGHLIGHT METHODS
+    #clearAllHighlights() {
+        for (let i = 0; i < 12; ++i) {
+            for (let j = 0; j < 12; ++j) {
+                this.#clearHighlight(j, i);
+            }
+        }
+    }
+
     #clearHighlight(x, y) {
         if (!this.#board.isInBoardRange(x) || !this.#board.isInBoardRange(y)) return;
         let canvas = document.getElementById(x + '|' + y + '|' + this.#id + 'c');
@@ -2850,5 +3031,43 @@ class GameMove {
         let dy = String.fromCharCode((108 - this.#y2));
         let promo = (this.#promotion) ? '+' : '';
         return ox + oy + epx + epy + dx + dy + promo;
+    }
+}
+
+class Arrow {
+    constructor(fromX, fromY, toX, toY, color) {
+        this.fromX = Math.max(0, (Math.min(11, Math.floor(fromX))));
+        this.fromY = Math.max(0, (Math.min(11, Math.floor(fromY))));
+        this.toX = Math.max(0, (Math.min(11, Math.floor(toX))));
+        this.toY = Math.max(0, (Math.min(11, Math.floor(toY))));
+        this.color = color;
+    }
+
+    equals(fromX, fromY, toX, toY, color) {
+        return this.fromX == fromX && this.fromY == fromY && this.toX == toX && this.toY == toY && this.color == color;
+    }
+
+    equalsWithDifferentColor(fromX, fromY, toX, toY, color) {
+        return this.fromX == fromX && this.fromY == fromY && this.toX == toX && this.toY == toY && this.color != color;
+    }
+
+    getFromX() {
+        return this.fromX;
+    }
+
+    getFromY() {
+        return this.fromY;
+    }
+
+    getToX() {
+        return this.toX;
+    }
+
+    getToY() {
+        return this.toY;
+    }
+
+    getColor() {
+        return this.color;
     }
 }
