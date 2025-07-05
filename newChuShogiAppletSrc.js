@@ -262,7 +262,7 @@ class ChuShogiApplet {
     #getCSS() {
         let cssTab = '<style>';
         // Board Container
-        cssTab += '#chuShogiApplet' + this.#id + ' { float:none;clear:both; }\n';
+        cssTab += '#chuShogiApplet' + this.#id + ' { overflow:hidden; }\n';
         cssTab += '#chuShogiApplet' + this.#id + ' #chuShogiBoard' + this.#id + ' { float:left;margin:0 10px 10px 0; }\n';
         cssTab += '#chuShogiApplet' + this.#id + ' #chuShogiHand' + this.#id + ' { text-align:center;height:' + (4 * this.#cellSize) + 'px;overflow-y:scroll; }\n';
         cssTab += '#chuShogiApplet' + this.#id + ' .chuShogiGameLog { float:left;clear:right;margin:0 0 10px 0; }\n';
