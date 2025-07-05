@@ -550,10 +550,10 @@ class ChuShogiApplet {
     }
 
     #getArrowCanvas() {
-    let cellBorderWidth = parseFloat(getComputedStyle((document.getElementById(('0|0|' + this.#id)))).getPropertyValue('border-width'));
-    let arrowCanvasSize = (12 * (this.#cellSize + 2)) + (13 * cellBorderWidth);
-    return '<canvas id="arrowCanvas' + this.#id + '" width="' + arrowCanvasSize + '"  height="' + arrowCanvasSize + '"></canvas>';
-}
+        let cellBorderWidth = parseFloat(getComputedStyle((document.getElementById(('0|0|' + this.#id)))).getPropertyValue('border-width'));
+        let arrowCanvasSize = (12 * (this.#cellSize + 2)) + (13 * cellBorderWidth);
+        return '<canvas id="arrowCanvas' + this.#id + '" width="' + arrowCanvasSize + '"  height="' + arrowCanvasSize + '"></canvas>';
+    }
 
     #embedHTML() {
         this.#embedTarget.innerHTML = this.#getHTML();
@@ -1110,7 +1110,7 @@ class ChuShogiApplet {
         this.updateChosenArrowColor(event.shiftKey, event.altKey);
         if (event.button == 0) {
             if (this.#viewOnly) {
-               this.#clearAllArrows();
+                this.#clearAllArrows();
             } else if (x != this.#arrowX || y != this.#arrowY) {
                 this.#click(x, y);
             }
@@ -1365,7 +1365,7 @@ class ChuShogiApplet {
     }
 
     #makeArrow(x1, y1, x2, y2, color) {
-    let foundArrow = false;
+        let foundArrow = false;
         for (let i = 0; i < this.#arrows.length; ++i) {
             if (this.#arrows[i].equals(x1, y1, x2, y2, color)) {
                 this.#arrows.splice(i, 1);
@@ -2243,7 +2243,6 @@ class Board {
                     ey = -1;
                 }
                 // Ensure all coordinates are valid
-                //ShowMessage();
                 if (!(this.isInBoardRange(x1) && this.isInBoardRange(y1) && this.isInMidpointBoardRange(ex) && this.isInMidpointBoardRange(ey) && this.isInBoardRange(x2) && this.isInBoardRange(y2))) {
                     return 2;
                 }
