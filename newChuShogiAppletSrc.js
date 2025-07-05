@@ -34,7 +34,6 @@ class ChuShogiApplet {
         return element.textContent; // Get the decoded text
     }
 
-
     // Vital Variables
     #id;
     #embedTarget;
@@ -97,6 +96,8 @@ class ChuShogiApplet {
     #arrowColor1 = '#c60000';
     #arrowColor2 = '#0000ff';
     #arrowColor3 = '#ffa500';
+    // Chosen Arrow Color
+    #chosenArrowColor = this.#arrowColor0;
 
     // Styling Variables
     #buttonColor = 'whitesmoke';
@@ -121,6 +122,18 @@ class ChuShogiApplet {
     #arrowTouchEndX = -1;
     #arrowTouchEndY = -1;
     #contextMenuDown = false;
+    #mouseHoveringOver = false;
+
+    // Event Handlers
+    mouseEventCode(event) {
+        this.keyEventCode(event);
+        document.getElementById('debug').innerHTML = this.#id;
+    }
+
+    keyEventCode(event) {
+        event.preventDefault();
+        this.updateChosenArrowColor(event.shiftKey, event.altKey);
+    }
 
     // Constructor
     constructor(id, embedTarget) {
@@ -250,7 +263,7 @@ class ChuShogiApplet {
         let cssTab = '<style>';
         // Board Container
         cssTab += '#chuShogiApplet' + this.#id + ' { float:none;clear:both; }\n';
-        cssTab += '#chuShogiApplet' + this.#id + ' .chuShogiBoard { float:left;margin:0 10px 10px 0; }\n';
+        cssTab += '#chuShogiApplet' + this.#id + ' #chuShogiBoard' + this.#id + ' { float:left;margin:0 10px 10px 0; }\n';
         cssTab += '#chuShogiApplet' + this.#id + ' #chuShogiHand' + this.#id + ' { text-align:center;height:' + (4 * this.#cellSize) + 'px;overflow-y:scroll; }\n';
         cssTab += '#chuShogiApplet' + this.#id + ' .chuShogiGameLog { float:left;clear:right;margin:0 0 10px 0; }\n';
         // Board and Hand
@@ -285,7 +298,7 @@ class ChuShogiApplet {
         cssTab += '#chuShogiApplet' + this.#id + ' .boardControlWithPlaceholder::placeholder { color:' + this.#textFieldPlaceholderColor + ' !important; }\n';
         // Arrow Canvas
         cssTab += '#chuShogiApplet' + this.#id + ' #arrowCanvasHolder' + this.#id + ' { position:relative;top:' + this.#rimSize + 'px;left:' + this.#rimSize + 'px;overflow:visible; }\n';
-        cssTab += '#chuShogiApplet' + this.#id + ' #arrowCanvas' + this.#id + ' { position:absolute;pointer-events:none;border:1px solid lime }\n';
+        cssTab += '#chuShogiApplet' + this.#id + ' #arrowCanvas' + this.#id + ' { position:absolute;pointer-events:none; }\n';
         cssTab += '</style>';
         return cssTab;
     }
@@ -320,7 +333,7 @@ class ChuShogiApplet {
             boardTab += '<td class="' + i + '|a' + '|' + this.#id + ' rimColCell"><b>' + (this.#flip ? this.#board.fileID(11 - i) : this.#board.fileID(i)) + '</b></td>';
         }
         boardTab += '<td class="rimCorner"></td></tr>';
-        boardTab += '<tr><td class="rowSpanningRimCell" colspan="14">' + this.#navigationPanel() + '</td></tr>';
+        boardTab += '<tr><td class="rowSpanningRimCell" colspan="14">' + this.#arrowColorButtons() + '&nbsp;' + this.#navigationPanel() + '</td></tr>';
 
         if (this.#allowPositionSetup && !this.#viewOnly) {
             boardTab += '<tr><td class="rowSpanningRimCell" colspan="14"></td></tr>';
@@ -384,6 +397,10 @@ class ChuShogiApplet {
             '<input type="button" class="graphicsOption' + this.#id + '" value="Alpha" onclick="chuApplets[' + this.#id + '].setImageSet(3);">&nbsp;' +
             '<input type="button" class="graphicsOption' + this.#id + '" value="Greenwade" onclick="chuApplets[' + this.#id + '].setImageSet(4);">&nbsp;' +
             '<input type="button" class="graphicsOption' + this.#id + '" value="Jocly" onclick="chuApplets[' + this.#id + '].setImageSet(5);">&nbsp;';
+    }
+
+    #arrowColorButtons() {
+        return '<input type="checkbox" id="shiftKey2' + this.#id + '" style="outline:5px solid ' + this.#arrowColor0 + ';" onclick="chuApplets[' + this.#id + '].updateChosenArrowColor(false, false);"><input type="checkbox" id="altKey2' + this.#id + '" style="outline:5px solid ' + this.#arrowColor0 + ';" onclick="chuApplets[' + this.#id + '].updateChosenArrowColor(false, false);">';
     }
 
     #navigationPanel() {
@@ -507,14 +524,14 @@ class ChuShogiApplet {
         gameLogTab += '<div id="gameInfo' + this.#id + '" class="chuGameLogDisplayOption' + this.#id + '" style="display:block">' + this.#gameLogWindow() + '</div>';
         gameLogTab += '<div id="dashboard' + this.#id + '" class="chuGameLogDisplayOption' + this.#id + '" style="display:none">' + this.#dashboardWindow() + '</div>';
         gameLogTab += '<div id="rules' + this.#id + '" class="chuGameLogDisplayOption' + this.#id + '" style="display:none"><p>INSERT RULES HERE</p></div>';
-        gameLogTab += '<div id="rules' + this.#id + '" class="chuGameLogDisplayOption' + this.#id + '" style="display:none"><p>INSERT HELP HERE</p></div>';
-        gameLogTab += '<div id="rules' + this.#id + '" class="chuGameLogDisplayOption' + this.#id + '" style="display:none"><p>INSERT ADVANCED HELP HERE</p></div>';
+        gameLogTab += '<div id="help' + this.#id + '" class="chuGameLogDisplayOption' + this.#id + '" style="display:none"><p>INSERT HELP HERE</p></div>';
+        gameLogTab += '<div id="advancedHelp' + this.#id + '" class="chuGameLogDisplayOption' + this.#id + '" style="display:none"><p>INSERT ADVANCED HELP HERE</p></div>';
         gameLogTab += '</div>';
         return gameLogTab;
     }
 
     #getHTML() {
-        return '<div id="chuShogiApplet' + this.#id + '"><div class="chuShogiBoard">' + this.#createBoardDisplay() + '</div><div class="chuShogiGameLog">' + this.#createGameLog() + '</div></div>';
+        return '<div id="chuShogiApplet' + this.#id + '"><div id="chuShogiBoard' + this.#id + '" onmousemove="chuApplets[' + this.#id + '].mouseEventCode(event);" onkeydown="chuApplets[' + this.#id + '].keyEventCode(event)">' + this.#createBoardDisplay() + '</div><div class="chuShogiGameLog">' + this.#createGameLog() + '</div></div>';
     }
 
     #getCellCanvas(x, y) {
@@ -585,6 +602,34 @@ class ChuShogiApplet {
         } else {
             setupBox.style.display = 'none';
         }
+    }
+
+    updateChosenArrowColor(shift, alt) {
+        if (this.#shiftKeyDown(shift) && !this.#altKeyDown(alt)) {
+            document.getElementById('shiftKey2' + this.#id).style.outline = '5px solid ' + this.#arrowColor1;
+            document.getElementById('altKey2' + this.#id).style.outline = '5px solid ' + this.#arrowColor1;
+            this.#chosenArrowColor = this.#arrowColor1;
+        } else if (!this.#shiftKeyDown(shift) && this.#altKeyDown(alt)) {
+            document.getElementById('shiftKey2' + this.#id).style.outline = '5px solid ' + this.#arrowColor2;
+            document.getElementById('altKey2' + this.#id).style.outline = '5px solid ' + this.#arrowColor2;
+            this.#chosenArrowColor = this.#arrowColor2;
+        } else if (this.#shiftKeyDown(shift) && this.#altKeyDown(alt)) {
+            document.getElementById('shiftKey2' + this.#id).style.outline = '5px solid ' + this.#arrowColor3;
+            document.getElementById('altKey2' + this.#id).style.outline = '5px solid ' + this.#arrowColor3;
+            this.#chosenArrowColor = this.#arrowColor3;
+        } else {
+            document.getElementById('shiftKey2' + this.#id).style.outline = '5px solid ' + this.#arrowColor0;
+            document.getElementById('altKey2' + this.#id).style.outline = '5px solid ' + this.#arrowColor0;
+            this.#chosenArrowColor = this.#arrowColor0;
+        }
+    }
+
+    #shiftKeyDown(keydown) {
+        return keydown || document.getElementById('shiftKey2' + this.#id).checked;
+    }
+
+    #altKeyDown(keydown) {
+        return keydown || document.getElementById('altKey2' + this.#id).checked;
     }
 
     isShowingInfluenceHighlights() {
@@ -1036,6 +1081,7 @@ class ChuShogiApplet {
 
     // Mouse Down Event
     mouseDown(x, y, event) {
+        this.updateChosenArrowColor(event.shiftKey, event.altKey);
         this.#arrowX = x;
         this.#arrowY = y;
 
@@ -1050,6 +1096,7 @@ class ChuShogiApplet {
 
     // Mouse Up Event
     mouseUp(x, y, event) {
+        this.updateChosenArrowColor(event.shiftKey, event.altKey);
         if (event.button == 0) {
             if (this.#viewOnly) {
                this.#clearAllArrows();
@@ -1072,6 +1119,7 @@ class ChuShogiApplet {
     }
 
     touchDown(x, y, event) {
+        this.updateChosenArrowColor(event.shiftKey, event.altKey);
         event.preventDefault();
         this.#arrowX = x;
         this.#arrowY = y;
@@ -1106,6 +1154,7 @@ class ChuShogiApplet {
     }
 
     touchUp(x, y, event) {
+        this.updateChosenArrowColor(event.shiftKey, event.altKey);
         clearTimeout(this.#touchTimer);
         event.preventDefault();
         if (!this.#contextMenuDown) {
@@ -1301,7 +1350,7 @@ class ChuShogiApplet {
         let rcy = (this.#flip) ? (12 - 1 - y) : y;
 
         if (this.#contextMenuOverride()) return;
-        else this.#makeArrow(aox, aoy, rcx, rcy, this.#arrowColor0);
+        else this.#makeArrow(aox, aoy, rcx, rcy, this.#chosenArrowColor);
     }
 
     #makeArrow(x1, y1, x2, y2, color) {
@@ -1341,7 +1390,7 @@ class ChuShogiApplet {
 
     #getCanvasCoord(n) {
         let cellBorderWidth = parseFloat(getComputedStyle((document.getElementById(('0|0|' + this.#id)))).getPropertyValue('border-width'));
-        return (n * (this.#cellSize + 2)) + ((n + 1) * cellBorderWidth) + (((this.#cellSize + 2) / 2));
+        return (n * (this.#cellSize + 2)) + ((n + 1) * cellBorderWidth) + (((this.#cellSize + 2) / 2) + 1);
     }
 
     #drawDotCanvasHighlight(x, y, color) {
