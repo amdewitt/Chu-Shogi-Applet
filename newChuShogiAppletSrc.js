@@ -309,7 +309,7 @@ class ChuShogiApplet {
             boardTab += '<tr>';
             boardTab += '<td class="a|' + i + '|' + this.#id + ' rimRowCell"><b>' + (this.#flip ? this.#board.rankID(11 - i) : this.#board.rankID(i)) + '</b></td>';
             for (let j = 0; j < 12; ++j) {
-                boardTab += '<td id="' + j + '|' + i + '|' + this.#id + '" class="boardCell" onmousedown="chuApplets[' + this.#id + '].mouseDown(' + j + ',' + i + ', event);" onmouseup="chuApplets[' + this.#id + '].mouseUp(' + j + ',' + i + ', event);" ontouchstart="chuApplets[' + this.#id + '].touchDown(' + j + ',' + i + ', event)" ontouchend="chuApplets[' + this.#id + '].touchUp(' + j + ',' + i + ', event)" oncontextmenu="event.preventDefault();">' + this.#getCellCanvas(j, i) + '</td>';
+                boardTab += '<td id="' + j + '|' + i + '|' + this.#id + '" class="boardCell" onmousedown="chuApplets[' + this.#id + '].mouseDown(' + j + ',' + i + ', event);" onmouseup="chuApplets[' + this.#id + '].mouseUp(' + j + ',' + i + ', event);" ontouchstart="chuApplets[' + this.#id + '].touchDown(' + j + ',' + i + ', event)" ontouchmove="chuApplets[' + this.#id + '].touchMove(' + j + ',' + i + ', event)" ontouchend="chuApplets[' + this.#id + '].touchUp(' + j + ',' + i + ', event)" oncontextmenu="event.preventDefault();">' + this.#getCellCanvas(j, i) + '</td>';
             }
             boardTab += '<td class="a|' + i + '|' + this.#id + ' rimRowCell"><b>' + (this.#flip ? this.#board.rankID(11 - i) : this.#board.rankID(i)) + '</b></td>';
             boardTab += '</tr>';
@@ -1067,16 +1067,53 @@ class ChuShogiApplet {
         event.preventDefault();
         this.#arrowX = x;
         this.#arrowY = y;
-        this.#click(x, y);
+
+        if (!this.#contextMenuOverride()) {
+            this.#touchTimer = setTimeout(this.#longTouchDown, 500, x, y);
+        } else {
+            clearTimeout(this.#touchTimer);
+        }
+    }
+
+    #longTouchDown(x, y) {
+        if (this.#contextMenuOverride()) return;
+        this.#contextMenuDown = true;
+        DrawDotCanvasHighlight(this.#arrowX, this.#arrowY, this.#selectionHighlightColor);
+    }
+
+    touchMove(x, y, event) {
+        event.preventDefault();
+
+        if (this.#contextMenuOverride()) return;
+        let longTouchEndpoint = document.elementFromPoint(event.changedTouches[0].clientX, event.changedTouches[0].clientY);
+        let searchTerm = '(?:[0-9]|1[01])\\|(?:[0-9]|1[01])\\|' + this.#id.toString();
+        let validEndpoint = new RegExp(`^${searchTerm}$`);
+        if (validEndpoint.test((longTouchEndpoint.id))) {
+            this.#arrowTouchEndX = longTouchEndpoint.id.split('|')[0];
+            this.#arrowTouchEndY = longTouchEndpoint.id.split('|')[1];
+        } else {
+            this.#arrowTouchEndX = -1;
+            this.#arrowTouchEndY = -1;
+        }
     }
 
     touchUp(x, y, event) {
+        clearTimeout(this.#touchTimer);
         event.preventDefault();
-        if (x != this.#arrowX || y != this.#arrowY) {
-            this.#click(x, y);
+        if (!this.#contextMenuDown) {
+            this.#click(x, y, event);
+        } else {
+            if (this.#arrowTouchEndX >= 0 && this.#arrowTouchEndX <= 11 && this.#arrowTouchEndY >= 0 && this.#arrowTouchEndY <= 11) {
+                this.#rightClick(this.#arrowTouchEndX, this.#arrowTouchEndY, event);
+            } else {
+                this.#rightClick(this.#arrowX, this.#arrowY, event);
+            }
+            this.#contextMenuDown = false;
         }
         this.#arrowX = -1;
         this.#arrowY = -1;
+        this.#arrowTouchEndX = -1;
+        this.#arrowTouchEndY = -1;
     }
 
     #click(x, y) {
